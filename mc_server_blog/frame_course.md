@@ -6,3 +6,5 @@
 双击运行START.bat，过一会不报错，不闪退，服务器就启动成功了！
 
 ![](https://gitcode.net/XingYuan/main/-/raw/master/bp2io-t4b0p.gif)
+
+#### [◀返回主页](.\index.html)
