@@ -23,3 +23,7 @@
 ## [框架下载](https://gitcode.net/XingYuan/main/-/tree/mc-server-frame)
 
 [v1.0版 框架下载](https://gitcode.net/XingYuan/main/-/raw/mc-server-frame/_v1.0__%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%A0%B8%E5%BF%831.12_1.18%E6%A1%86%E6%9E%B6.zip)
+
+## [映射软件下载](http://www.kaifuxia.com/)
+
+[开服侠 软件下载](http://bak.dl.kaifuxia.com.kunlunio.com:8080/mcsc.zip)
