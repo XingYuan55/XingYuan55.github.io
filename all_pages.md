@@ -12,6 +12,8 @@
 
 [22w47a](.\study\22w47a.html)
 
+[23030101：考试（1）](.\study\23030101.html)
+
 ### [面向朋友们]()
 
 [刘明扬请看](https://xingyuan55.github.io/forFriends/forLMY.html)
