@@ -14,20 +14,4 @@
 		> .label {
 			display: none;
 		}
-
-		&:before {
-			line-height: inherit;
-		}
-
-		&.solid {
-			&:before {
-				font-weight: 900;
-			}
-		}
-
-		&.brands {
-			&:before {
-				font-family: 'Font Awesome 5 Brands';
-			}
-		}
 	}

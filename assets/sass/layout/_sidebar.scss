@@ -8,7 +8,7 @@
 
 	#search {
 		form {
-			@include icon(false, solid);
+			@include icon;
 			position: relative;
 
 			&:before {
@@ -83,7 +83,7 @@
 		}
 
 		.toggle {
-			@include icon(false, solid);
+			@include icon;
 			@include vendor('transition', 'left 0.5s ease');
 			-webkit-tap-highlight-color: rgba(255,255,255,0);
 			border: 0;
@@ -95,8 +95,7 @@
 			overflow: hidden;
 			position: absolute;
 			text-align: center;
-			text-indent: -15em;
-			white-space: nowrap;
+			text-indent: 7.5em;
 			top: 0;
 			width: 6em;
 			z-index: _misc(z-index-base);
