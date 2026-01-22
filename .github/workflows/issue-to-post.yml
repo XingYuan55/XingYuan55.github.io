@@ -1,0 +1,303 @@
+name: Convert Issue to Post
+on:
+  issues:
+    types: [labeled]
+# 添加工作流级别的权限
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+  actions: write
+jobs:
+  convert:
+    name: Convert Issue to Post
+    if: github.event.label.name == 'article'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check if should process
+        id: check
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const issue = context.payload.issue;
+
+            // 检查是否已经有成功的评论
+            const comments = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issue.number
+            });
+
+            // 检查最近的评论是否是错误信息
+            const recentComments = comments.data.slice(-2);
+            console.log('Recent comments:', recentComments.map(c => c.body));
+
+            const hasErrorComment = recentComments.some(comment => 
+              comment.body.includes('❌')
+            );
+
+            const hasSuccessComment = recentComments.some(comment => 
+              comment.body.includes('✅ 文章已成功转换并提交！')
+            );
+
+            // 如果是新添加 article 标签的情况，忽略之前的成功评论
+            const isNewLabel = context.payload.action === 'labeled' && 
+                             context.payload.label.name === 'article';
+
+            if (isNewLabel || (hasErrorComment && !hasSuccessComment)) {
+              console.log('需要处理文章');
+              core.setOutput('should_process', 'true');
+              return;
+            }
+
+            if (hasSuccessComment && !isNewLabel) {
+              console.log('已经处理过的文章，跳过');
+              core.setOutput('should_process', 'false');
+              return;
+            }
+
+            console.log('新文章，开始处理');
+            core.setOutput('should_process', 'true');
+      - name: Checkout
+        if: steps.check.outputs.should_process == 'true'
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          submodules: true
+      - name: Process Issue
+        if: steps.check.outputs.should_process == 'true'
+        id: process
+        uses: actions/github-script@v6
+        with:
+          script: |
+            function isValidDate(dateStr) {
+              if (!dateStr) return false;
+              // 移除引号
+              dateStr = dateStr.replace(/^["']|["']$/g, '');
+              const regex = /^\d{4}-\d{2}-\d{2}(?:\s*#.*)?$/;
+              if (!regex.test(dateStr)) return false;
+              const pureDateStr = dateStr.split('#')[0].trim();
+              const date = new Date(pureDateStr);
+              return date instanceof Date && !isNaN(date);
+            }
+            try {
+              const issue = context.payload.issue;
+              if (!issue || !issue.body) {
+                throw new Error('Issue or issue body is missing');
+              }
+              // 提取 Front Matter 和正文
+              const matches = issue.body.match(/<!--[\s\S]*?-->\s*---\s*([\s\S]*?)\s*---\s*([\s\S]*)/);
+              if (!matches) {
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issue.number,
+                  body: '❌ 文章格式不正确，请使用正确的模板格式。'
+                });
+                return core.setFailed('Invalid article format');
+              }
+              const frontMatter = matches[1].trim();
+              const content = matches[2].trim();
+              console.log('Raw frontMatter:', frontMatter); // 添加调试日志
+              
+              // 解析 Front Matter
+              const meta = {};
+              frontMatter.split('\n').forEach(line => {
+                line = line.trim();
+                if (!line) return; // 跳过空行
+                
+                // 使用正则表达式匹配键值对
+                const match = line.match(/^(\w+)\s*:\s*(?:"([^"]*)"|'([^']*)'|([^#\s][^#]*[^#\s]))(?:\s*#.*)?$/);
+                if (match) {
+                  const [, key, doubleQuoted, singleQuoted, unquoted] = match;
+                  // 使用第一个非undefined的捕获组作为值
+                  const value = doubleQuoted ?? singleQuoted ?? unquoted ?? '';
+                  meta[key] = value.trim();
+                  console.log(`Parsed ${key}:`, meta[key]); // 添加调试日志
+                }
+              });
+              
+              console.log('Final meta:', meta);
+              
+              // 验证必需字段
+              if (!meta.title || !meta.date) {
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issue.number,
+                  body: '❌ 文章缺少必需的字段 (title 或 date)'
+                });
+                return core.setFailed('Missing required fields');
+              }
+              // 验证日期
+              if (!isValidDate(meta.date)) {
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issue.number,
+                  body: '❌ 日期格式不正确，请使用 YYYY-MM-DD 格式（如：2025-02-24）'
+                });
+                return core.setFailed('Invalid date format');
+              }
+              // 解析 categories
+              let categories = [];
+              try {
+                categories = JSON.parse((meta.categories || '[]').replace(/'/g, '"'));
+              } catch (e) {
+                console.error('解析 categories 失败:', e);
+                categories = [];
+              }
+
+              // 定义分类映射
+              const categoryMap = {
+                '公告': 'announcement',
+                '产物制作': 'product',
+                '理论知识': 'theory',
+                '协会讨论': 'discussion',
+                '其他': 'uncategorized'
+              };
+
+              // 确定文章类型
+              let type = 'uncategorized'; // 默认分类
+              for (const category of categories) {
+                if (categoryMap[category]) {
+                  type = categoryMap[category];
+                  break;
+                }
+              }
+
+              // 生成文件路径
+              const path = `content/posts/${type}/${meta.date}-${issue.number}.md`;
+
+              // 清理标签
+              function sanitizeTags(tags) {
+                if (!tags) return '[]';
+                try {
+                  let tagArray = JSON.parse(tags.replace(/'/g, '"'));
+                  tagArray = tagArray.map(tag => {
+                    // 保留 auth: 前缀，但清理其他不安全字符
+                    if (tag.startsWith('auth:')) {
+                      // 对于 auth: 标签，只清理末尾的点和空格
+                      return tag.replace(/[.\s]+$/, '').trim();
+                    } else {
+                      // 对于其他标签，移除不安全字符，但保留括号
+                      return tag.replace(/[.\s]+$/, '')  // 移除末尾的点和空格
+                             .replace(/[<>:"\\|?*]+/g, '') // 移除 Windows 不允许的字符，但保留括号
+                             .trim();
+                    }
+                  });
+                  return JSON.stringify(tagArray);
+                } catch (e) {
+                  console.error('解析 tags 失败:', e);
+                  return '[]';
+                }
+              }
+
+              // 生成新的 Front Matter
+              const newFrontMatter = [
+                '---',
+                `title: "${meta.title || ''}"`,
+                `date: ${meta.date}`,
+                `description: "${meta.description || ''}"`,
+                `categories: ${meta.categories || '[]'}`,
+                `tags: ${sanitizeTags(meta.tags)}`,
+                `author: "${meta.author || ''}"`,
+                'draft: false',
+                '---'
+              ].join('\n');
+
+              const fileContent = `${newFrontMatter}\n\n${content}`;
+              
+              // 使用 base64 编码内容
+              const encodedContent = Buffer.from(fileContent).toString('base64');
+              
+              core.setOutput('fileName', path);
+              core.setOutput('content', encodedContent);
+              core.setOutput('success', 'true');
+              return JSON.stringify({
+                fileName: path,
+                content: encodedContent
+              });
+            } catch (error) {
+              console.error('Error:', error);
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.issue.number,
+                body: `❌ 处理文章时出错：${error.message}`
+              });
+              core.setFailed(error.message);
+            }
+      - name: Create and Merge Pull Request
+        if: steps.check.outputs.should_process == 'true' && steps.process.outputs.success == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          # 配置 Git
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+
+          # 创建新分支
+          git checkout -b article/${{ github.event.issue.number }}
+
+          # 写入文件（使用 base64 编码避免 shell 转义问题）
+          mkdir -p $(dirname "${{ steps.process.outputs.fileName }}")
+          echo "${{ steps.process.outputs.content }}" | base64 --decode > "${{ steps.process.outputs.fileName }}"
+
+          # 提交更改
+          git add .
+          git commit -m "feat: add article from issue #${{ github.event.issue.number }}"
+          git push origin article/${{ github.event.issue.number }}
+
+          # 创建 PR
+          pr_number=$(gh pr create \
+            --title "feat: add article from issue #${{ github.event.issue.number }}" \
+            --body "Converted from issue #${{ github.event.issue.number }}" \
+            --base main \
+            --head article/${{ github.event.issue.number }} | grep -o '[0-9]*$')
+
+          echo "Created PR #${pr_number}"
+
+          # 等待 1 秒确保 PR 创建完成
+          sleep 1
+
+          # 自动合并 PR
+          gh pr merge ${pr_number} \
+            --admin \
+            --squash \
+            --delete-branch
+      - name: Trigger Hugo deployment
+        if: steps.check.outputs.should_process == 'true' && steps.process.outputs.success == 'true'
+        run: |
+          curl -L \
+            -X POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            https://api.github.com/repos/${{ github.repository }}/actions/workflows/hugo.yaml/dispatches \
+            -d '{"ref":"main"}'
+      - name: Comment on Issue
+        if: steps.check.outputs.should_process == 'true' && steps.process.outputs.success == 'true'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fileName = '${{ steps.process.outputs.fileName }}';
+            const pathParts = fileName.split('/');
+            const category = pathParts[2];
+            const filename = pathParts[pathParts.length - 1].replace('.md', '');
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.issue.number,
+              body: '✅ 文章已成功转换并提交！\n\n' +
+                    '⏳ 网站正在更新中，请等待 1-2 分钟后访问：\n' +
+                    `https://chemuasso-cn.github.io/posts/${category}/${filename}/`
+            });
+            await github.rest.issues.update({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.issue.number,
+              state: 'closed',
+              labels: ['published']
+            });

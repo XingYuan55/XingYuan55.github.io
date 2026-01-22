@@ -1,0 +1,18 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>星圆的小站 – 指南</title>
+    <link>http://localhost:1313/tags/%E6%8C%87%E5%8D%97/</link>
+    <description>Recent content in 指南 on 星圆的小站</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-cn</language>
+    
+	  <atom:link href="http://localhost:1313/tags/%E6%8C%87%E5%8D%97/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+      
+        
+      
+    
+    
+  </channel>
+</rss>
