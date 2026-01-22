@@ -1,0 +1,42 @@
+@font-face {
+    font-family: 'Jost';
+    src: url('/fonts/Jost-300-Light.otf') format('opentype');
+    font-weight: 300;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Sarasa_r';
+    src: url('/fonts/SARASA-UI-SC-REGULAR.TTF') format('truetype');
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Sarasa_l';
+    src: url('/fonts/SARASA-UI-SC-LIGHT.TTF') format('truetype');
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Harmony_r';
+    src: url('/fonts/HARMONYOS_SANS_SC_REGULAR.TTF') format('truetype');
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Harmony_l';
+    src: url('/fonts/HARMONYOS_SANS_SC_LIGHT.TTF') format('truetype');
+    font-style: normal;
+    font-display: swap;
+}
+
+.content,
+body {
+    font-family: 'Jost', 'Harmony_l', 'Times New Roman', Times, serif;
+}
+
+/* emm没想好用Harmony字体regular还是light还是Sarasa字体。。。。。 */

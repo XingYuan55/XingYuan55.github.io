@@ -1,0 +1,30 @@
+baseURL: "https://Xingyuan55.github.io/"
+languageCode: "zh-cn"
+title: "星圆的小站"
+theme: "hextra"
+
+markup:
+  goldmark:
+    renderer:
+      unsafe: true
+
+menu:
+  main:
+    - name: 文章
+      pageRef: /blog
+      weight: 2
+    - name: 文档
+      pageRef: /docs
+      weight: 1
+    - name: 作品
+      pageRef: /works
+      weight: 3
+    - name: 搜索
+      weight: 4
+      params:
+        type: search
+    - name: GitHub
+      weight: 5
+      url: "https://github.com/Xingyuan55/"
+      params:
+        icon: github
