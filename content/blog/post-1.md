@@ -1,8 +1,14 @@
 ---
 title: "依旧重构本站"
-date: 2025-02-23
+date: 2025-08-30
+authors:
+  - name: Xingyuan55
+    link: https://github.com/Xingyuan55
+tags:
+  - "test"
 ---
 
+### 咕
 好的，我该写东西了。
 
 2025-02-24：
