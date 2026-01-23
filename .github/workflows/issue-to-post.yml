@@ -204,7 +204,7 @@ jobs:
                 `title: "${meta.title || ''}"`,
                 `date: ${meta.date}`,
                 `description: "${meta.description || ''}"`,
-                `tags: ${sanitizeTags(meta.tags)} || ''`,
+                `tags: ${sanitizeTags(meta.tags) || []}`,
                 // 处理author标签，变为 `authors: \n  - name: <meta.author>形式`
                 `authors:\n  - name: "${meta.author || 'Xingyuan55'}"`,
                 'draft: false',
