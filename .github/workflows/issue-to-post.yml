@@ -139,35 +139,44 @@ jobs:
                 });
                 return core.setFailed('Invalid date format');
               }
-              // 解析 categories
-              let categories = [];
-              try {
-                categories = JSON.parse((meta.categories || '[]').replace(/'/g, '"'));
-              } catch (e) {
-                console.error('解析 categories 失败:', e);
-                categories = [];
-              }
+
+
+              // 解析 分区
+              let postpartRaw = (meta.postpart || 'blog').toString().trim();
+              // 去掉可能的外层单/双引号
+              let postpart = postpartRaw.replace(/^['"]|['"]$/g, '');
+
 
               // 定义分类映射
-              const categoryMap = {
-                '公告': 'announcement',
-                '产物制作': 'product',
-                '理论知识': 'theory',
-                '协会讨论': 'discussion',
-                '其他': 'uncategorized'
+              const postpartMap = {
+                '文章': 'blog',
+                '作品': 'works'
               };
 
-              // 确定文章类型
-              let type = 'uncategorized'; // 默认分类
-              for (const category of categories) {
-                if (categoryMap[category]) {
-                  type = categoryMap[category];
-                  break;
-                }
-              }
+              const allowedEnglish = Object.values(postpartMap);
 
+              // 确定文章类型
+              let type = 'blog'; // 默认分类
+              if (postpartMap[postpart]) {
+                type = postpartMap[postpart];
+              }
+              else if (allowedEnglish.includes(postpart.toLowerCase())) {
+                type = postpart;
+              }
+              else {
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issue.number,
+                  body: '❌ 文章分区不正确，应为 文章 / 作品 或对应的英文 blog / works，，已使用默认分类 blog'
+                  });
+                type = 'blog';
+              }
+              
+              const safeDate = (meta.date || new Date().toISOString()).replace(/:/g, '-');
               // 生成文件路径
-              const path = `content/posts/${type}/${meta.date}-${issue.number}.md`;
+              const path = `content/${type}/${safeDate}-${issue.number}.md`;
+
 
               // 清理标签
               function sanitizeTags(tags) {
@@ -199,9 +208,9 @@ jobs:
                 `title: "${meta.title || ''}"`,
                 `date: ${meta.date}`,
                 `description: "${meta.description || ''}"`,
-                `categories: ${meta.categories || '[]'}`,
-                `tags: ${sanitizeTags(meta.tags)}`,
-                `author: "${meta.author || ''}"`,
+                `tags: ${sanitizeTags(meta.tags)} || ''`,
+                // 处理author标签，变为 `authors: \n  - name: <meta.author>形式`
+                `authors:\n  - name: "${meta.author || 'Xingyuan55'}"`,
                 'draft: false',
                 '---'
               ].join('\n');
