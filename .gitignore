@@ -1,0 +1,10 @@
+# Hugo 编译产物（核心要忽略的）
+/public/
+/resources/_gen/
+hugo_stats.json
+
+# 其他通用忽略项（可选，按需添加）
+.DS_Store
+*.log
+.idea/
+.vscode/
