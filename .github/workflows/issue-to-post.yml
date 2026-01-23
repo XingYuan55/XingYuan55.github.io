@@ -148,100 +148,100 @@ jobs:
                   issue_number: issue.number,
                   body: '❌ 日期格式不正确，请使用 YYYY-MM-DD 格式（如：2025-02-24）'
                 });
-      return core.setFailed('Invalid date format');
-    }
+                  return core.setFailed('Invalid date format');
+              }
 
-    // 解析 分区
-    let postpartRaw = (meta.postpart || 'blog').toString().trim();
-    let postpart = postpartRaw.replace(/^['"]|['"]$/g, '');
+              // 解析 分区
+              let postpartRaw = (meta.postpart || 'blog').toString().trim();
+              let postpart = postpartRaw.replace(/^['"]|['"]$/g, '');
 
-    // 定义分类映射
-    const postpartMap = {
-      '文章': 'blog',
-      '作品': 'works'
-    };
-    const allowedEnglish = Object.values(postpartMap); // ['blog','works']
+              // 定义分类映射
+              const postpartMap = {
+                '文章': 'blog',
+                '作品': 'works'
+              };
+              const allowedEnglish = Object.values(postpartMap); // ['blog','works']
 
-    // 确定文章类型
-    let type = 'blog'; // 默认分类
-    if (postpartMap[postpart]) {
-      type = postpartMap[postpart];
-    } else if (allowedEnglish.includes(postpart.toLowerCase())) {
-      type = postpart.toLowerCase();
-    } else {
-      await github.rest.issues.createComment({
-        owner: context.repo.owner,
-        repo: context.repo.repo,
-        issue_number: issue.number,
-        body: '❌ 文章分区不正确，应为 文章 / 作品 或对应的英文 blog / works，已使用默认分类 blog'
-      });
-      type = 'blog';
-    }
+              // 确定文章类型
+              let type = 'blog'; // 默认分类
+              if (postpartMap[postpart]) {
+                type = postpartMap[postpart];
+              } else if (allowedEnglish.includes(postpart.toLowerCase())) {
+                type = postpart.toLowerCase();
+              } else {
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issue.number,
+                  body: '❌ 文章分区不正确，应为 文章 / 作品 或对应的英文 blog / works，已使用默认分类 blog'
+                });
+                type = 'blog';
+              }
 
-    const safeDate = (meta.date || new Date().toISOString()).replace(/:/g, '-');
-    const path = `content/${type}/${safeDate}-${issue.number}.md`;
+              const safeDate = (meta.date || new Date().toISOString()).replace(/:/g, '-');
+              const path = `content/${type}/${safeDate}-${issue.number}.md`;
 
-    // 清理标签
-    function sanitizeTags(tags) {
-      if (!tags) return '[]';
-      try {
-        // 支持用户用单引号写数组 ['a'] 的情况
-        let tagArray = JSON.parse(tags.replace(/'/g, '"'));
-        if (!Array.isArray(tagArray)) return '[]';
-        tagArray = tagArray.map(tag => {
-          return tag.toString()
-                    .replace(/[.\s]+$/, '')            // 移除末尾的点和空格
-                    .replace(/[<>:"\\|?*]+/g, '')     // 移除 Windows 不允许的字符
-                    .trim();
-        });
-        return JSON.stringify(tagArray);
-      } catch (e) {
-        console.error('解析 tags 失败:', e);
-        return '[]';
-      }
-    }
+              // 清理标签
+              function sanitizeTags(tags) {
+                if (!tags) return '[]';
+                try {
+                  // 支持用户用单引号写数组 ['a'] 的情况
+                  let tagArray = JSON.parse(tags.replace(/'/g, '"'));
+                  if (!Array.isArray(tagArray)) return '[]';
+                  tagArray = tagArray.map(tag => {
+                    return tag.toString()
+                              .replace(/[.\s]+$/, '')            // 移除末尾的点和空格
+                              .replace(/[<>:"\\|?*]+/g, '')     // 移除 Windows 不允许的字符
+                              .trim();
+                  });
+                  return JSON.stringify(tagArray);
+                } catch (e) {
+                  console.error('解析 tags 失败:', e);
+                  return '[]';
+                }
+              }
 
-    // 生成新的 Front Matter
-    const newFrontMatter = [
-      '---',
-      `title: "${meta.title || ''}"`,
-      `date: ${meta.date}`,
-      `description: "${meta.description || ''}"`,
-      // 直接输出 sanitizeTags 的结果（合法的 JSON 数组文本）
-      `tags: ${sanitizeTags(meta.tags)}`,
-      // authors 格式
-      `authors:`,
-      `  - name: "${meta.author || 'Xingyuan55'}"`,
-      'draft: false',
-      '---'
-    ].join('\n');
+              // 生成新的 Front Matter
+              const newFrontMatter = [
+                '---',
+                `title: "${meta.title || ''}"`,
+                `date: ${meta.date}`,
+                `description: "${meta.description || ''}"`,
+                // 直接输出 sanitizeTags 的结果（合法的 JSON 数组文本）
+                `tags: ${sanitizeTags(meta.tags)}`,
+                // authors 格式
+                `authors:`,
+                `  - name: "${meta.author || 'Xingyuan55'}"`,
+                'draft: false',
+                '---'
+              ].join('\n');
 
-    const fileContent = `${newFrontMatter}\n\n${content}`;
+              const fileContent = `${newFrontMatter}\n\n${content}`;
 
-    // 使用 base64 编码内容
-    const encodedContent = Buffer.from(fileContent).toString('base64');
+              // 使用 base64 编码内容
+              const encodedContent = Buffer.from(fileContent).toString('base64');
 
-    core.setOutput('fileName', path);
-    core.setOutput('content', encodedContent);
-    core.setOutput('success', 'true');
-    return JSON.stringify({
-      fileName: path,
-      content: encodedContent
-    });
-  } catch (error) {
-    console.error('Error:', error);
-    try {
-      await github.rest.issues.createComment({
-        owner: context.repo.owner,
-        repo: context.repo.repo,
-        issue_number: context.payload.issue.number,
-        body: `❌ 处理文章时出错：${error.message}`
-      });
-    } catch (e) {
-      console.error('同时发送错误评论也失败:', e);
-    }
-    core.setFailed(error.message);
-  }
+              core.setOutput('fileName', path);
+              core.setOutput('content', encodedContent);
+              core.setOutput('success', 'true');
+              return JSON.stringify({
+                fileName: path,
+                content: encodedContent
+              });
+            } catch (error) {
+              console.error('Error:', error);
+              try {
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: context.payload.issue.number,
+                  body: `❌ 处理文章时出错：${error.message}`
+                });
+              } catch (e) {
+                console.error('同时发送错误评论也失败:', e);
+              }
+              core.setFailed(error.message);
+            }
       - name: Create and Merge Pull Request
         if: steps.check.outputs.should_process == 'true' && steps.process.outputs.success == 'true'
         env:
