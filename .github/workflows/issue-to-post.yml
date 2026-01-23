@@ -184,16 +184,10 @@ jobs:
                 try {
                   let tagArray = JSON.parse(tags.replace(/'/g, '"'));
                   tagArray = tagArray.map(tag => {
-                    // 保留 auth: 前缀，但清理其他不安全字符
-                    if (tag.startsWith('auth:')) {
-                      // 对于 auth: 标签，只清理末尾的点和空格
-                      return tag.replace(/[.\s]+$/, '').trim();
-                    } else {
-                      // 对于其他标签，移除不安全字符，但保留括号
-                      return tag.replace(/[.\s]+$/, '')  // 移除末尾的点和空格
-                             .replace(/[<>:"\\|?*]+/g, '') // 移除 Windows 不允许的字符，但保留括号
-                             .trim();
-                    }
+                    return tag.replace(/[.\s]+$/, '')  // 移除末尾的点和空格
+                            .replace(/[<>:"\\|?*]+/g, '') // 移除 Windows 不允许的字符，但保留括号
+                            .trim();
+                    
                   });
                   return JSON.stringify(tagArray);
                 } catch (e) {
