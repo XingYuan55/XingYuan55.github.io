@@ -26,8 +26,8 @@ cascade:
 
 好力！
 
-现在你可以[/ancient_pages](点击这里前往 /ancient_pages 浏览中古页面)
-也可以[/ancient_pages/old](点击这里前往 /ancient_pages/old 浏览中古重构时期残余的远古主页)
+现在你可以 [点击这里前往 /ancient_pages 浏览中古页面](/ancient_pages)
+也可以 [点击这里前往 /ancient_pages/old 浏览中古重构时期残余的远古主页](/ancient_pages/old)
 
 ### 个人站里为什么会有【文档】分区？
 
