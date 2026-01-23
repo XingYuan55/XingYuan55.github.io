@@ -1,5 +1,5 @@
 ---
-name: 投稿
+name: 文稿投稿
 about: 使用此模板提交新文稿
 title: "[文稿] 在此输入标题"
 labels: article
