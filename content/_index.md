@@ -39,10 +39,13 @@ layout: hextra-home
 </div>
 -->
 
+{{< hextra/hero-badge link="https://hmyqaq.github.io/">}}
+  <div class="hx:w-2 hx:h-2 hx:rounded-full hx:bg-primary-400"></div>
+  <span>友情链接：HM的小站</span>
+  {{< icon name="arrow-circle-right" attributes="height=14" >}}
+{{< /hextra/hero-badge >}}
 
-
-
-<div class="hx:mt-4"></div>
+<div class="hx:mt-8 "></div>
 
 {{< hextra/feature-grid>}}
 
