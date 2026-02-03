@@ -1,5 +1,5 @@
 ---
-title: 作品
+title: 文章
 linktitle: 文章
 weight: 2
 cascade:
