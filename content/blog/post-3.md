@@ -2,7 +2,7 @@
 title: "Linux安装记"
 date: 2026-02-03
 description: "UEFI启动EasyBCD不能用时 无U盘Windows11安装Linux - Zorin系统 长文教程/记录"
-tags: ["无聊瞎发","Daily"]
+tags: ["学习笔记"]
 authors:
   - name: "Xingyuan55"
 draft: false
