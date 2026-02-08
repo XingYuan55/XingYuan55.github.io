@@ -42,6 +42,8 @@ params:
     article:
       displayPagination: true
 
+
+
   works:
     list:
       displayTags: true
@@ -89,4 +91,8 @@ params:
       emitMetadata: 0
       inputPosition: top
       lang: zh-CN
+
+  editURL:
+    enable: true
+    base: "https://github.com/XingYuan55/XingYuan55.github.io/edit/master/content"
 
