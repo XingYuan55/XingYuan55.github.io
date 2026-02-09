@@ -22,12 +22,31 @@ fcitx-diagnose
 
 然后把输出的全文复制给AI，AI应该会给你解决方案，不能用就再来一遍或者换个AI。
 
-### 拥抱 Fcitx5
+### 安装 Fcitx5
 
 Fcitx（Fcitx4）与 基于Ubuntu 24.04的Zorin OS18 的GNOME环境 存在底层兼容性冲突，因此我们不能使用 基于Fcitx4的谷歌拼音和搜狗拼音，而是需要使用 Fcitx5。
 
 > [!IMPORTANT]
 >
-> 如果您曾经安装过`Fcitx4`或搜狗拼音、谷歌拼音，请卸载:
+> 如果您曾经安装过`Fcitx4`或搜狗拼音、谷歌拼音，请卸载。
 > ```bash
-> sudo apt purge "fcitx" "fcitx*" "sogoupinyin" "soug
+> sudo apt purge "fcitx" "fcitx*" "sogoupinyin" "sogou*" -y
+> rm -rf ~/.config/fcitx ~/.cache/fcitx ~/.config/sogou*
+> sudo apt autoremove --purge -u
+> ```
+
+以下命令安装 Fcitx5 核心、中文输入法、配置工具：
+
+```bash
+sudo apt install fcitx5 fcitx5-chinese-addons fcitx5-fronted-gtk3 fcitx5-fronted-qt5 fcitx-configtool -y
+```
+
+如果您使用的是`GNOME`桌面环境，还需要安装托盘支持：
+```bash
+sudo apt install gnome-shell-extension-appindicator -y
+```
+
+### 配置 Fcitx5
+
+我们还需要配置环境变量。在环境变量文件中添加：
+```
