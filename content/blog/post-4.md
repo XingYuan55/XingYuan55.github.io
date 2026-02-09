@@ -26,4 +26,8 @@ fcitx-diagnose
 
 Fcitx（Fcitx4）与 基于Ubuntu 24.04的Zorin OS18 的GNOME环境 存在底层兼容性冲突，因此我们不能使用 基于Fcitx4的谷歌拼音和搜狗拼音，而是需要使用 Fcitx5。
 
-首先，如果您曾经安装过`Fcitx4`或搜狗拼音、谷歌拼音，请卸载
+> [!IMPORTANT]
+>
+> 如果您曾经安装过`Fcitx4`或搜狗拼音、谷歌拼音，请卸载:
+> ```bash
+> sudo apt purge "fcitx" "fcitx*" "sogoupinyin" "soug
