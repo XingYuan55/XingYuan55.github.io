@@ -28,7 +28,15 @@ fcitx-diagnose
 然后把输出的全文复制给AI，AI应该会给你解决方案，不能用就再来一遍或者换个AI。
 
 ---
-首先请设置系统语言为汉语。如果存在多种语言，请将汉语排在第一位。
+#### 准备工作
+
+1. 请设置系统语言为汉语。如果存在多种语言，请将汉语排在第一位。
+2. 请卸载系统自带的`iBus`（如果有的话）：
+   ```bash
+   sudo apt autoremove ibus
+   sudo apt purge ibus
+   ```
+
 
 
 ### 拥抱Fcitx5
@@ -60,7 +68,6 @@ sudo apt install fcitx5 fcitx5-chinese-addons fcitx5-frontend-gtk3 fcitx5-fronte
 ```bash
 sudo apt install gnome-shell-extension-appindicator -y
 ```
-
 #### 环境变量
 
 我们还需要配置环境变量。在环境变量文件（通常为`/etc/environment`文件）中添加：
@@ -104,6 +111,12 @@ source /etc/environment
 
 然后重启计算机或注销登录。
 
+
+
+#### 桌面输入法框架配置
+进入设置 -> 系统 -> 区域与语言 -> 管理已安装语言，将底部【键盘输入法系统】选中 `Fcitx 5`。
+
+
 ### Xorg会话
 
 截至目前，我们已经成功安装了`fcitx5`及配套的中文输入法。
@@ -115,12 +128,12 @@ source /etc/environment
 
 如果您能正常输入汉字，且使用时无Bug,则本节按理来说可以跳过。
 
-若不能，请继续阅读本节。
+若不能，请继续阅读本节，并按本节所述来操作。
 
-fcitx在 Wayland 会话下基本残废（作者亲测：fcitx5也残废）。如果您正在使用 Wayland 会话环境，我们必须切换到 Xrog 会话。
+fcitx在 Wayland 会话下基本残废（作者亲测：fcitx5也残废）。您大概率正在使用 Wayland 会话环境，我们必须切换到 Xrog 会话。
 
 > [!TIP]
-> 如果您想证实这一点，可以像导言所述一样，运行：
+> 如果您想证实 Wayland与fcitx不兼容 这一点，可以像导言所述一样，运行：
 > ```bash
 > fcitx5-diagnose
 > ```
@@ -136,7 +149,7 @@ fcitx在 Wayland 会话下基本残废（作者亲测：fcitx5也残废）。如
 4. 登录进来
 5. 然后：
    ```bash
-   fcitx6 -r
+   fcitx5 -r
    ````
 
 现在托盘里应该出来了，输入法也能用了。
@@ -149,6 +162,27 @@ fcitx在 Wayland 会话下基本残废（作者亲测：fcitx5也残废）。如
 
 不想配置也可以，在应用启动屏幕您可以找到 Fcitx5 应用，每次开机启动一下就好。
 
-:TODO
-我还没配置开机自启，这一部分待完善。
+使用 XDG Autostart 自启动标准，创建
+```
+~/.config/autostart/fcitx5.desktop
+```
+文件，写入如下内容：
+```toml
+[Desktop Entry]
+Type=Application
+Name=Fcitx 5
+Comment=Start Fcitx 5 Input Method
+Exec=fcitx5 -d
+X-GNOME-Autostart-enabled=true
+NoDisplay=true
+```
 
+这是参照 [这篇文章](https://zhuanlan.zhihu.com/p/1985819598298317256) 给出的办法配置的。此文章还给了关于 Fcitx5 其他方面配置的教程，包括安装、设置框架、自启动、环境变量、附属工具等，可以作为补充来阅读。
+
+配置自启动的方法不止一种。若以上方法创建的自启动不好使，请自行上网搜索。
+
+### 结语
+
+事实上配置并不麻烦，但我试错试了很长时间，导致花了整整一天时间我才脱离自带的iBus输入法转入Fcitx。正如导言所述，最开始没想着用Fcitx5，而是想用搜狗输入法，但在AI的分析下，我发现 搜狗输入法与我的系统不兼容，没招了，豆包老师让我换成 Fcitx5 和 Xorg。本着前人栽树后人乘凉的精神，我写下这篇教程，试图让更多人减少试错时间。这篇是我夜晚在轿车上，顶着快没电的电脑用刚配好的Linux输入法写的。如果哪里不清晰，敬请随时邮箱我。
+
+            Xingyuan55, 260209, 23: 56
