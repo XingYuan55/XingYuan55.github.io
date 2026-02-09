@@ -53,7 +53,7 @@ Fcitx（Fcitx4）与 Zorin OS18 的 GNOME 环境存在底层兼容性冲突，�
 以下命令安装 Fcitx5 核心、中文输入法、配置工具：
 
 ```bash
-sudo apt install fcitx5 fcitx5-chinese-addons fcitx5-fronted-gtk3 fcitx5-fronted-qt5 fcitx-configtool -y
+sudo apt install fcitx5 fcitx5-chinese-addons fcitx5-frontend-gtk3 fcitx5-frontend-qt5 fcitx-configtool fcitx5-config-qt -y
 ```
 
 如果您使用的是`GNOME`桌面环境，还需要安装托盘支持：
@@ -136,7 +136,7 @@ fcitx在 Wayland 会话下基本残废（作者亲测：fcitx5也残废）。如
 4. 登录进来
 5. 然后：
    ```bash
-   fcitx -r
+   fcitx6 -r
    ````
 
 现在托盘里应该出来了，输入法也能用了。
