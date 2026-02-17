@@ -3,6 +3,10 @@ languageCode: "zh-cn"
 title: "星圆的小站"
 theme: "hextra"
 
+module:
+  imports:
+    - path: "./hextra"
+
 markup:
   goldmark:
     renderer:
@@ -121,4 +125,3 @@ params:
   editURL:
     enable: true
     base: "https://github.com/XingYuan55/XingYuan55.github.io/edit/master/content"
-
