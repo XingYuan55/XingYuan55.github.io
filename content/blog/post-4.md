@@ -72,14 +72,20 @@ sudo apt install gnome-shell-extension-appindicator -y
 
 我们还需要配置环境变量。在环境变量文件（通常为`/etc/environment`文件）中添加：
 ```bash
-XIM=fcitx5
-XIM_PROGRAM=fcitx5
-GTK_IM_MODULE=fcitx5
-QT_IM_MODULE=fcitx5
-XMODIFIERS=@im=fcitx5
-SDL_IM_MODULE=fcitx5
-GLFW_IM_MODULE=fcitx5
+XIM=fcitx
+XIM_PROGRAM=fcitx
+GTK_IM_MODULE=fcitx
+QT_IM_MODULE=fcitx
+XMODIFIERS=@im=fcitx
+SDL_IM_MODULE=fcitx
+GLFW_IM_MODULE=fcitx
 ```
+
+> [!TIP]
+> 事实上，我们使用的是`fcitx5`而不是`fcitx`，但在环境变量配置中我们写的却是`fcitx`。这是因为如果在这里写`fcitx5`可能导致 微信 等软件中无法输入中文。
+> 
+> 若您发现这里写`...=fcitx`会导致更严重的问题，请全部换成`...=fcitx5`
+> 
 
 > [!NOTE]
 >
