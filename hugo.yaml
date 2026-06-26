@@ -1,5 +1,5 @@
 baseURL: "https://Xingyuan55.github.io/"
-languageCode: "zh-cn"
+locale: "zh-cn"
 title: "星圆的小站"
 theme: "hextra"
 
@@ -60,6 +60,9 @@ menu:
       weight: 6
 
 params:
+  author:
+    name: "Xingyuan55"
+    email: "xingyuan55@users.noreply.github.com"
   blog:
     list:
       displayTags: true
