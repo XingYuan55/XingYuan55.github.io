@@ -1,7 +1,7 @@
 ---
 title: "舞萌w0时回顾"
 date: 2026-05-10
-description: ""
+description: "不知不觉间入坑舞萌也有3个月了，在2026年5月10日我和我的朋友 KRK 终于 w0 确认了。值此我简单回顾下我从入坑开始到现在的历程，记录下我作为萌新的视角里舞萌的样子罢"
 tags: ["学习笔记", "maimai"]
 authors:
   - name: "Xingyuan55"
