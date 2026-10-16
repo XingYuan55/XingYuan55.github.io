@@ -1,5 +1,6 @@
 baseURL: "https://Xingyuan55.github.io/"
 locale: "zh-cn"
+timeZone: "Asia/Shanghai"
 title: "星圆的小站"
 theme: "hextra"
 
